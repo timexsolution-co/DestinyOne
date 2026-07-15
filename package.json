@@ -10,10 +10,11 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "check": "pnpm typecheck && pnpm test",
+    "check": "npm run typecheck && npm run test",
     "export:web": "expo export --platform web --output-dir dist",
-    "build:web": "pnpm export:web",
-    "release:check": "pnpm check && pnpm build:web"
+    "build:web": "npm run export:web",
+    "vercel-build": "npm run export:web",
+    "deploy": "npm run export:web && npx vercel --prod dist"
   },
   "dependencies": {
     "@expo-google-fonts/poppins": "^0.4.1",
