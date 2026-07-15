@@ -29,7 +29,9 @@
         "foregroundImage": "./assets/icon-red-velvet.png",
         "backgroundColor": "#090002"
       },
-      "blockedPermissions": ["android.permission.ACCESS_FINE_LOCATION"]
+      "blockedPermissions": [
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -40,22 +42,35 @@
       "backgroundColor": "#090002"
     },
     "plugins": [
-      ["expo-image-picker", {
-        "photosPermission": "DestinyOne needs photo access so you can build your relationship profile.",
-        "cameraPermission": "DestinyOne uses the camera for profile photos and selfie verification."
-      }],
-      ["expo-audio", {
-        "microphonePermission": "DestinyOne uses the microphone to record your optional voice introduction."
-      }],
-      ["expo-location", {
-        "locationWhenInUsePermission": "DestinyOne uses approximate location only when you enable Crossed Paths. Your exact location is never shown to other members.",
-        "isIosBackgroundLocationEnabled": false,
-        "isAndroidBackgroundLocationEnabled": false
-      }],
-      ["@stripe/stripe-react-native", {
-        "merchantIdentifier": "merchant.com.destinyone.app",
-        "enableGooglePay": true
-      }]
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "DestinyOne needs photo access so you can build your relationship profile.",
+          "cameraPermission": "DestinyOne uses the camera for profile photos and selfie verification."
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "DestinyOne uses the microphone to record your optional voice introduction."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "DestinyOne uses approximate location only when you enable Crossed Paths. Your exact location is never shown to other members.",
+          "isIosBackgroundLocationEnabled": false,
+          "isAndroidBackgroundLocationEnabled": false
+        }
+      ],
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.destinyone.app",
+          "enableGooglePay": true
+        }
+      ],
+      "expo-web-browser"
     ]
   }
 }

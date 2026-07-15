@@ -1,4 +1,5 @@
 import type { RealtimeChannel } from '@supabase/supabase-js';
+import { Platform } from 'react-native';
 import { appEnvironment, backendReadinessError, isSupabaseConfigured, requiresRealBackend, supabase } from '../lib/supabase';
 import type { ChatMessage } from '../storage';
 import type { Database, Json, MessageRow, ProfileRow } from '../types/database';
@@ -23,6 +24,54 @@ function getEmailRedirectTo() {
 
 function ensureBackendConfigured() {
   if (backendReadinessError) throw new Error(backendReadinessError);
+}
+
+// Real Google sign-in via Supabase OAuth.
+// - Web: Supabase redirects the whole page to Google, then back to redirectTo.
+// - Native (iOS/Android): open Google in an in-app browser, then read the
+//   returned access/refresh tokens from the callback URL and set the session.
+export async function signInWithGoogle() {
+  ensureBackendConfigured();
+
+  if (Platform.OS === 'web') {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: getEmailRedirectTo() },
+    });
+    if (error) throw error;
+    return { redirecting: true } as const;
+  }
+
+  const [{ openAuthSessionAsync }, { makeRedirectUri }] = await Promise.all([
+    import('expo-web-browser'),
+    import('expo-auth-session'),
+  ]);
+
+  const redirectTo = makeRedirectUri({ scheme: 'destinyone' });
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo, skipBrowserRedirect: true },
+  });
+  if (error) throw error;
+  if (!data?.url) throw new Error('Could not start Google sign-in.');
+
+  const result = await openAuthSessionAsync(data.url, redirectTo);
+  if (result.type !== 'success' || !result.url) {
+    throw new Error('Google sign-in was cancelled.');
+  }
+
+  const callbackUrl = new URL(result.url);
+  const paramSource = callbackUrl.hash ? callbackUrl.hash.slice(1) : callbackUrl.search.slice(1);
+  const params = new URLSearchParams(paramSource);
+  const access_token = params.get('access_token');
+  const refresh_token = params.get('refresh_token');
+  if (!access_token || !refresh_token) {
+    throw new Error('Google sign-in did not return a valid session.');
+  }
+
+  const { error: sessionError } = await supabase.auth.setSession({ access_token, refresh_token });
+  if (sessionError) throw sessionError;
+  return { redirecting: false } as const;
 }
 
 type ProfileMediaKind = 'photo' | 'voice' | 'verification';
